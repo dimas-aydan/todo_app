@@ -1,0 +1,95 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// User roles in our system 
+// Note: SQLite doesn't natively support ENUMS in the same way PostgreSQL does, 
+// so we'll use string constants in the application, but we can document the expected values here.
+// Roles: "ADMIN", "TEAM", "CLIENT"
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String?
+  role      String   @default("CLIENT") // "ADMIN", "TEAM", "CLIENT"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  projectMembers  ProjectMember[]
+  assignedTasks   TaskAssignee[]
+  comments        Comment[]
+}
+
+model Project {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  members ProjectMember[]
+  tasks   Task[]
+}
+
+model ProjectMember {
+  id        String   @id @default(uuid())
+  projectId String
+  userId    String
+  createdAt DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, userId]) // A user can only be added to a project once
+}
+
+model Task {
+  id             String   @id @default(uuid())
+  projectId      String
+  title          String
+  description    String?
+  clientStatus   String   @default("Submitted") // "Submitted", "In Progress", "Review", "Done"
+  internalStatus String?                        // "Triage", "Development", "QA", "Blocked"
+  dueDate        DateTime?
+  timeEstimate   Int?     // In minutes
+  timeTracked    Int      @default(0) // In minutes
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  project   Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  assignees TaskAssignee[]
+  comments  Comment[]
+}
+
+model TaskAssignee {
+  id        String   @id @default(uuid())
+  taskId    String
+  userId    String
+  createdAt DateTime @default(now())
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([taskId, userId]) // A user can only be assigned to a task once
+}
+
+model Comment {
+  id         String   @id @default(uuid())
+  taskId     String
+  authorId   String
+  content    String
+  isInternal Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  task   Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  author User @relation(fields: [authorId], references: [id], onDelete: Cascade)
+}
