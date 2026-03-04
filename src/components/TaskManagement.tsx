@@ -7,7 +7,7 @@ import { assignUserToTask, updateTaskStatus } from "@/app/actions/tasks";
 export function TaskManagement({ task, members, currentUser }: { task: any; members: any[]; currentUser?: any }) {
     const router = useRouter();
 
-    const [clientStatus, setClientStatus] = useState(task.clientStatus || "Submitted");
+    const [clientStatus, setClientStatus] = useState(task.clientStatus || "Submitted / Client Reply");
     const [internalStatus, setInternalStatus] = useState(task.internalStatus || "Inbox");
     const [selectedUser, setSelectedUser] = useState("");
     const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
@@ -84,7 +84,7 @@ export function TaskManagement({ task, members, currentUser }: { task: any; memb
                         value={clientStatus}
                         onChange={(e) => setClientStatus(e.target.value)}
                     >
-                        <option value="Submitted">Submitted</option>
+                        <option value="Submitted / Client Reply">Submitted / Client Reply</option>
                         <option value="In Progress">In Progress</option>
                         <option value="Pending Customer">Pending Customer</option>
                         <option value="On Hold">On Hold</option>

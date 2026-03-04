@@ -9,7 +9,7 @@ type TaskProps = Partial<Task> & {
 };
 
 const STATUS_COLORS: Record<string, string> = {
-    "Submitted": "bg-green-100 text-green-700 border-green-200",
+    "Submitted / Client Reply": "bg-green-100 text-green-700 border-green-200",
     "In Progress": "bg-orange-100 text-orange-700 border-orange-200",
     "Pending Customer": "bg-purple-100 text-purple-700 border-purple-200",
     "On Hold": "bg-blue-100 text-blue-700 border-blue-200",

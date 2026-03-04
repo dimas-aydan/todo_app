@@ -62,7 +62,7 @@ export default async function TaskPage({ params }: { params: Promise<{ id: strin
                         <div className="flex-shrink-0">
                             {(() => {
                                 const STATUS_COLORS: Record<string, string> = {
-                                    "Submitted": "bg-green-100 text-green-700 border-green-200",
+                                    "Submitted / Client Reply": "bg-green-100 text-green-700 border-green-200",
                                     "In Progress": "bg-orange-100 text-orange-700 border-orange-200",
                                     "Pending Customer": "bg-purple-100 text-purple-700 border-purple-200",
                                     "On Hold": "bg-blue-100 text-blue-700 border-blue-200",
@@ -101,6 +101,10 @@ export default async function TaskPage({ params }: { params: Promise<{ id: strin
                                 <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
                                 Discussion
                             </h2>
+
+                            <div className="mb-8">
+                                <CommentForm taskId={task.id} isClient={isClient} />
+                            </div>
 
                             <div className="space-y-5 mb-8">
                                 {comments.length === 0 && (
@@ -143,8 +147,6 @@ export default async function TaskPage({ params }: { params: Promise<{ id: strin
                                     </div>
                                 ))}
                             </div>
-
-                            <CommentForm taskId={task.id} isClient={isClient} />
 
                         </section>
                     </div>

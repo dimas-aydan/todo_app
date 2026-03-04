@@ -11,7 +11,7 @@ interface KanbanBoardProps {
 }
 
 const COLUMNS = [
-    { title: "Submitted", status: "Submitted", emptyText: "No requests submitted yet." },
+    { title: "Submitted / Client Reply", status: "Submitted / Client Reply", emptyText: "No requests submitted yet." },
     { title: "In Progress", status: "In Progress", emptyText: "No tasks actively being worked on." },
     { title: "Pending Customer", status: "Pending Customer", emptyText: "Nothing waiting on the client." },
     { title: "On Hold", status: "On Hold", emptyText: "No tasks are blocked." },
@@ -82,7 +82,7 @@ export function KanbanBoard({ tasks: initialTasks, userRole }: KanbanBoardProps)
                         <div className="flex items-center justify-between mb-4 px-2">
                             {(() => {
                                 const STATUS_TEXT_COLORS: Record<string, string> = {
-                                    "Submitted": "text-green-700",
+                                    "Submitted / Client Reply": "text-green-700",
                                     "In Progress": "text-orange-700",
                                     "Pending Customer": "text-purple-700",
                                     "On Hold": "text-blue-700",

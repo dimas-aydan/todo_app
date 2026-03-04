@@ -13,7 +13,7 @@ export async function getComments(taskId: string) {
 
     const comments = await prisma.comment.findMany({
         where: { taskId },
-        orderBy: { createdAt: "asc" },
+        orderBy: { createdAt: "desc" },
         include: {
             author: { select: { name: true, role: true } }
         }
@@ -34,7 +34,7 @@ export async function addComment(taskId: string, content: string, isInternal: bo
     // Clients cannot create internal comments
     const finalIsInternal = session.user.role === "CLIENT" ? false : isInternal;
 
-    return prisma.comment.create({
+    const comment = await prisma.comment.create({
         data: {
             taskId,
             authorId: session.user.id,
@@ -42,4 +42,13 @@ export async function addComment(taskId: string, content: string, isInternal: bo
             isInternal: finalIsInternal
         }
     });
+
+    if (session.user.role === "CLIENT") {
+        await prisma.task.update({
+            where: { id: taskId },
+            data: { clientStatus: "Submitted / Client Reply" }
+        });
+    }
+
+    return comment;
 }
