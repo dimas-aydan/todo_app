@@ -3,8 +3,10 @@ import { authOptions } from "../../api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getComments } from "@/app/actions/comments";
+import { getAvailableAssignees } from "@/app/actions/tasks";
 import Link from "next/link";
 import { CommentForm } from "@/components/CommentForm";
+import { TaskManagement } from "@/components/TaskManagement";
 
 export default async function TaskPage({ params }: { params: Promise<{ id: string }> }) {
     const session = await getServerSession(authOptions);
@@ -31,6 +33,12 @@ export default async function TaskPage({ params }: { params: Promise<{ id: strin
 
     const comments = await getComments(task.id);
     const isClient = session.user.role === "CLIENT";
+
+    // Only fetch members if the user is a team member/admin
+    let availableMembers: any[] = [];
+    if (!isClient) {
+        availableMembers = await getAvailableAssignees(task.projectId);
+    }
 
     return (
         <div className="min-h-screen bg-slate-50 flex justify-center py-10 px-4 sm:px-6 lg:px-8">
@@ -157,67 +165,9 @@ export default async function TaskPage({ params }: { params: Promise<{ id: strin
                             )}
                         </div>
 
-                        {/* Team Management (Hidden from clients) */}
+                        {/* Interactive Team Management (Hidden from clients) */}
                         {!isClient && (
-                            <div className="bg-amber-50 rounded-2xl p-6 border border-amber-200/60 shadow-sm">
-                                <h3 className="font-bold text-amber-900 mb-5 text-sm uppercase tracking-wider flex items-center gap-2">
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                                    Team Management
-                                </h3>
-
-                                <div className="space-y-5">
-                                    <div>
-                                        <label className="block text-amber-800 text-xs font-bold mb-1.5 uppercase tracking-wide">Internal Status</label>
-                                        <select
-                                            className="w-full p-2.5 border border-amber-300 rounded-lg bg-white text-slate-900 font-medium text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none shadow-sm"
-                                            defaultValue={task.internalStatus || "Inbox"}
-                                        >
-                                            <option value="Inbox">Inbox / Triage</option>
-                                            <option value="Development">Development</option>
-                                            <option value="QA">QA / Review</option>
-                                            <option value="Blocked">Blocked</option>
-                                        </select>
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-amber-800 text-xs font-bold mb-1.5 uppercase tracking-wide">Time Estimate (mins)</label>
-                                        <div className="relative">
-                                            <input
-                                                type="number"
-                                                className="w-full p-2.5 border border-amber-300 rounded-lg bg-white text-slate-900 font-medium text-sm placeholder-slate-400 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none shadow-sm pl-9"
-                                                defaultValue={task.timeEstimate || ""}
-                                                placeholder="e.g. 120"
-                                            />
-                                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                <svg className="h-4 w-4 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                </svg>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-amber-800 text-xs font-bold mb-1.5 uppercase tracking-wide">Time Tracked (mins)</label>
-                                        <div className="relative">
-                                            <input
-                                                type="number"
-                                                className="w-full p-2.5 border border-amber-300 rounded-lg bg-white text-slate-900 font-medium text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none shadow-sm pl-9"
-                                                defaultValue={task.timeTracked || 0}
-                                            />
-                                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                <svg className="h-4 w-4 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                </svg>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <button className="w-full mt-2 bg-amber-600 hover:bg-amber-700 text-white font-semibold py-2.5 px-4 rounded-lg text-sm transition-colors shadow-sm">
-                                        Update Meta
-                                    </button>
-                                </div>
-                            </div>
+                            <TaskManagement task={task} members={availableMembers} />
                         )}
 
                     </div>
