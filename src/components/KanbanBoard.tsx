@@ -75,14 +75,27 @@ export function KanbanBoard({ tasks: initialTasks, userRole }: KanbanBoardProps)
                 return (
                     <div
                         key={idx}
-                        className="bg-slate-100/70 border border-slate-200/60 p-4 rounded-2xl min-h-[500px] flex flex-col flex-shrink-0 w-80 md:w-auto md:flex-1 snap-center"
+                        className="bg-slate-100/70 border border-slate-200/60 p-4 rounded-2xl min-h-[500px] flex flex-col w-[300px] md:w-[320px] shrink-0"
                         onDragOver={handleDragOver}
                         onDrop={(e) => handleDrop(e, col.status)}
                     >
                         <div className="flex items-center justify-between mb-4 px-2">
-                            <h3 className="font-bold text-slate-800 text-sm tracking-wide flex items-center gap-2">
-                                {col.title}
-                            </h3>
+                            {(() => {
+                                const STATUS_TEXT_COLORS: Record<string, string> = {
+                                    "Submitted": "text-green-700",
+                                    "In Progress": "text-orange-700",
+                                    "Pending Customer": "text-purple-700",
+                                    "On Hold": "text-blue-700",
+                                    "Review / Done": "text-gray-700"
+                                };
+                                const textColor = STATUS_TEXT_COLORS[col.status] || "text-slate-800";
+
+                                return (
+                                    <h3 className={`font-bold ${textColor} text-sm tracking-wide flex items-center gap-2`}>
+                                        {col.title}
+                                    </h3>
+                                );
+                            })()}
                             <span className="bg-slate-200 text-slate-600 text-xs font-bold px-2.5 py-0.5 rounded-full">
                                 {colTasks.length}
                             </span>

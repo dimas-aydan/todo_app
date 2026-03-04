@@ -7,6 +7,7 @@ import { getAvailableAssignees } from "@/app/actions/tasks";
 import Link from "next/link";
 import { CommentForm } from "@/components/CommentForm";
 import { TaskManagement } from "@/components/TaskManagement";
+import { AssignToMeButton } from "@/components/AssignToMeButton";
 
 export default async function TaskPage({ params }: { params: Promise<{ id: string }> }) {
     const session = await getServerSession(authOptions);
@@ -59,9 +60,22 @@ export default async function TaskPage({ params }: { params: Promise<{ id: strin
                             </p>
                         </div>
                         <div className="flex-shrink-0">
-                            <span className="inline-flex px-4 py-1.5 text-sm font-semibold rounded-full bg-blue-50 text-blue-700 border border-blue-200 shadow-sm">
-                                {task.clientStatus}
-                            </span>
+                            {(() => {
+                                const STATUS_COLORS: Record<string, string> = {
+                                    "Submitted": "bg-green-100 text-green-700 border-green-200",
+                                    "In Progress": "bg-orange-100 text-orange-700 border-orange-200",
+                                    "Pending Customer": "bg-purple-100 text-purple-700 border-purple-200",
+                                    "On Hold": "bg-blue-100 text-blue-700 border-blue-200",
+                                    "Review / Done": "bg-gray-100 text-gray-700 border-gray-200"
+                                };
+                                const colorClass = STATUS_COLORS[task.clientStatus] || "bg-slate-100 text-slate-700 border-slate-200";
+
+                                return (
+                                    <span className={`inline-flex px-4 py-1.5 text-sm font-semibold rounded-full border shadow-sm ${colorClass}`}>
+                                        {task.clientStatus}
+                                    </span>
+                                );
+                            })()}
                         </div>
                     </div>
                 </div>
@@ -140,10 +154,13 @@ export default async function TaskPage({ params }: { params: Promise<{ id: strin
 
                         {/* Assignees */}
                         <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
-                            <h3 className="font-bold text-slate-900 mb-4 text-sm uppercase tracking-wider flex items-center gap-2">
-                                <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-                                Assignees
-                            </h3>
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="font-bold text-slate-900 text-sm uppercase tracking-wider flex items-center gap-2">
+                                    <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                                    Assignees
+                                </h3>
+                                <AssignToMeButton taskId={task.id} currentUser={session.user} />
+                            </div>
                             {task.assignees.length > 0 ? (
                                 <ul className="space-y-3 mt-4">
                                     {task.assignees.map(a => (
@@ -167,7 +184,7 @@ export default async function TaskPage({ params }: { params: Promise<{ id: strin
 
                         {/* Interactive Team Management (Hidden from clients) */}
                         {!isClient && (
-                            <TaskManagement task={task} members={availableMembers} />
+                            <TaskManagement task={task} members={availableMembers} currentUser={session.user} />
                         )}
 
                     </div>

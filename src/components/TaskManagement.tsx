@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { assignUserToTask, updateTaskStatus } from "@/app/actions/tasks";
 
-export function TaskManagement({ task, members }: { task: any; members: any[] }) {
+export function TaskManagement({ task, members, currentUser }: { task: any; members: any[]; currentUser?: any }) {
     const router = useRouter();
 
     const [clientStatus, setClientStatus] = useState(task.clientStatus || "Submitted");
@@ -12,6 +12,25 @@ export function TaskManagement({ task, members }: { task: any; members: any[] })
     const [selectedUser, setSelectedUser] = useState("");
     const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
     const [isAssigning, setIsAssigning] = useState(false);
+
+    const handleAssignToMe = async () => {
+        if (!currentUser) return;
+        setIsAssigning(true);
+
+        try {
+            const res = await assignUserToTask(task.id, currentUser.id, currentUser.name || currentUser.email);
+            if (res.success) {
+                router.refresh();
+            } else {
+                alert(res.message);
+            }
+        } catch (e) {
+            console.error(e);
+            alert("Failed to assign user.");
+        } finally {
+            setIsAssigning(false);
+        }
+    };
 
     const handleUpdateStatus = async () => {
         setIsUpdatingStatus(true);

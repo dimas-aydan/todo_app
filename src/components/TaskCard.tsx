@@ -8,20 +8,30 @@ type TaskProps = Partial<Task> & {
     assignees?: Array<{ user: { name: string; email: string } }>;
 };
 
+const STATUS_COLORS: Record<string, string> = {
+    "Submitted": "bg-green-100 text-green-700 border-green-200",
+    "In Progress": "bg-orange-100 text-orange-700 border-orange-200",
+    "Pending Customer": "bg-purple-100 text-purple-700 border-purple-200",
+    "On Hold": "bg-blue-100 text-blue-700 border-blue-200",
+    "Review / Done": "bg-gray-100 text-gray-700 border-gray-200"
+};
+
 export function TaskCard({ task, userRole }: { task: TaskProps, userRole: string }) {
+    const statusColor = STATUS_COLORS[task.clientStatus] || "bg-slate-100 text-slate-600 border-slate-200";
+
     return (
         <div className="group p-5 bg-white border border-slate-200/60 rounded-xl shadow-sm hover:shadow-md hover:border-slate-300 transition-all cursor-pointer relative overflow-hidden">
             {/* Subtle left accent bar on hover */}
             <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
 
-            <div className="flex justify-between items-start mb-3 gap-4">
-                <Link href={`/task/${task.id}`} className="flex-1 before:absolute before:inset-0">
-                    <h3 className="text-base font-bold text-slate-800 group-hover:text-blue-600 transition-colors line-clamp-2 leading-snug">
+            <div className="flex flex-col items-start gap-2 mb-3">
+                <Link href={`/task/${task.id}`} className="w-full before:absolute before:inset-0">
+                    <h3 className="text-base font-bold text-slate-800 group-hover:text-blue-600 transition-colors leading-snug">
                         {task.title}
                     </h3>
                 </Link>
                 <div className="flex-shrink-0">
-                    <span className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-md bg-slate-100 text-slate-600 border border-slate-200">
+                    <span className={`px-2 py-1 text-[10px] font-bold uppercase tracking-wider rounded border ${statusColor}`}>
                         {task.clientStatus}
                     </span>
                 </div>
