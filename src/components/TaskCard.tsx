@@ -1,8 +1,6 @@
 import Link from "next/link";
 import { Task } from "@prisma/client";
 
-// This type allows us to handle the task regardless of if it's 
-// fully fetched (Team) or stripped down (Client)
 type TaskProps = Partial<Task> & {
     id: string;
     title: string;
@@ -12,47 +10,61 @@ type TaskProps = Partial<Task> & {
 
 export function TaskCard({ task, userRole }: { task: TaskProps, userRole: string }) {
     return (
-        <div className="p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition">
-            <div className="flex justify-between items-start mb-2">
-                <Link href={`/task/${task.id}`}>
-                    <h3 className="text-lg font-semibold text-blue-600 hover:text-blue-800">
+        <div className="group p-5 bg-white border border-slate-200/60 rounded-xl shadow-sm hover:shadow-md hover:border-slate-300 transition-all cursor-pointer relative overflow-hidden">
+            {/* Subtle left accent bar on hover */}
+            <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+
+            <div className="flex justify-between items-start mb-3 gap-4">
+                <Link href={`/task/${task.id}`} className="flex-1 before:absolute before:inset-0">
+                    <h3 className="text-base font-bold text-slate-800 group-hover:text-blue-600 transition-colors line-clamp-2 leading-snug">
                         {task.title}
                     </h3>
                 </Link>
-                <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
-                    {task.clientStatus}
-                </span>
+                <div className="flex-shrink-0">
+                    <span className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-md bg-slate-100 text-slate-600 border border-slate-200">
+                        {task.clientStatus}
+                    </span>
+                </div>
             </div>
 
             {/* Team Only Badges */}
             {userRole !== "CLIENT" && (
-                <div className="flex gap-2 mb-3">
+                <div className="flex flex-wrap gap-2 mb-4">
                     {task.internalStatus && (
-                        <span className="px-2 py-1 text-xs font-medium rounded bg-gray-100 text-gray-700 border border-gray-300">
-                            Internal: {task.internalStatus}
+                        <span className="px-2 py-0.5 text-[10px] font-bold tracking-wide uppercase rounded flex items-center gap-1 bg-amber-50 text-amber-700 border border-amber-200/50">
+                            <span className="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                            {task.internalStatus}
                         </span>
                     )}
                     {task.timeEstimate !== undefined && (
-                        <span className="px-2 py-1 text-xs font-medium rounded bg-yellow-50 text-yellow-700 border border-yellow-200">
-                            Est: {task.timeEstimate}m
+                        <span className="px-2 py-0.5 text-[10px] font-bold tracking-wide uppercase rounded flex items-center gap-1 bg-indigo-50 text-indigo-700 border border-indigo-200/50">
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            {task.timeEstimate}m
                         </span>
                     )}
                 </div>
             )}
 
             {/* Assignees - Visible to Everyone */}
-            {task.assignees && task.assignees.length > 0 && (
-                <div className="mt-3 pt-3 border-t border-gray-100 flex items-center gap-2 text-sm text-gray-500">
-                    <span>Assigned:</span>
-                    <div className="flex gap-1">
+            <div className="mt-4 pt-3 border-t border-slate-100/80 flex items-center justify-between">
+                <span className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Assignees</span>
+
+                {task.assignees && task.assignees.length > 0 ? (
+                    <div className="flex -space-x-2">
                         {task.assignees.map((a, i) => (
-                            <span key={i} className="px-2 py-1 bg-gray-100 rounded text-xs" title={a.user.email}>
-                                {a.user.name || "User"}
-                            </span>
+                            <div
+                                key={i}
+                                className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-[10px] ring-2 ring-white z-10 hover:z-20 transition-transform hover:scale-110"
+                                title={a.user.email}
+                            >
+                                {(a.user.name || a.user.email)[0].toUpperCase()}
+                            </div>
                         ))}
                     </div>
-                </div>
-            )}
+                ) : (
+                    <span className="text-xs text-slate-400 italic">Unassigned</span>
+                )}
+            </div>
         </div>
     );
 }
