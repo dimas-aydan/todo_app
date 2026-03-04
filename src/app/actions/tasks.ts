@@ -66,7 +66,8 @@ export async function createTask(projectId: string, data: { title: string, descr
     const session = await getSession();
     if (!session?.user) throw new Error("Unauthorized");
 
-    const clientStatus = "Submitted";
+    // Default status - clients submit requests, team members create tasks in progress
+    const clientStatus = "Submitted / Client Reply";
     const internalStatus = session.user.role === "CLIENT" ? "Triage" : "Development";
 
     return prisma.task.create({
